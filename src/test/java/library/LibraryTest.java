@@ -1,131 +1,153 @@
+
 package library;
 
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
+import java.util.List;
 
-	import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-	import java.time.LocalDate;
+public class LibraryTest {
 
-	import org.junit.jupiter.api.BeforeEach;
-	import org.junit.jupiter.api.Test;
+    private Library library;
+    private Member member;
+    private Copy copy1, copy2, copy3, copy4, copy5, copy6;
 
-	public class LibraryTest {
+    private LocalDate today = LocalDate.of(2026, 11, 4);
 
-	    private Library library;
-	    private Member member;
-	    private Copy copy1;
-	    private Copy copy2;
-	    private Copy copy3;
-	    private Copy copy4;
-	    private Copy copy5;
-	    private Copy copy6;
+    @BeforeEach
+    public void setUp() {
 
-	    private LocalDate today = LocalDate.of(2026, 11, 4);
+        library = new Library();
 
-	    @BeforeEach
-	    public void setUp() {
+        member = new Member("M001", "Ali");
+        library.registerMember(member);
 
-	        library = new Library();
+        Book book = new Book("12345", "Java Programming", 2024);
+        library.registerBook(book);
 
-	        member = new Member("M001", "Ali");
-	        library.registerMember(member);
+        copy1 = new Copy("C001", book);
+        copy2 = new Copy("C002", book);
+        copy3 = new Copy("C003", book);
+        copy4 = new Copy("C004", book);
+        copy5 = new Copy("C005", book);
+        copy6 = new Copy("C006", book);
 
-	        Book book = new Book("12345", "Java Programming", 2024);
-	        library.registerBook(book);
+        library.registerCopy(copy1);
+        library.registerCopy(copy2);
+        library.registerCopy(copy3);
+        library.registerCopy(copy4);
+        library.registerCopy(copy5);
+        library.registerCopy(copy6);
+    }
 
-	        copy1 = new Copy("C001", book);
-	        copy2 = new Copy("C002", book);
-	        copy3 = new Copy("C003", book);
-	        copy4 = new Copy("C004", book);
-	        copy5 = new Copy("C005", book);
-	        copy6 = new Copy("C006", book);
+    @Test
+    public void testLendCopy() {
 
-	        library.registerCopy(copy1);
-	        library.registerCopy(copy2);
-	        library.registerCopy(copy3);
-	        library.registerCopy(copy4);
-	        library.registerCopy(copy5);
-	        library.registerCopy(copy6);
-	    }
+        Loan loan = library.lend("M001", "C001", today);
 
-	    @Test
-	    public void testLendCopy() {
+        assertNotNull(loan);
+        assertFalse(copy1.isAvailable());
+        assertTrue(loan.isOpen());
+        assertEquals(today.plusDays(14), loan.getDueDate());
+    }
 
-	        Loan loan = library.lend("M001", "C001", today);
+    @Test
+    public void testCannotLendUnavailableCopy() {
 
-	        assertNotNull(loan);
-	        assertFalse(copy1.isAvailable());
-	        assertTrue(loan.isOpen());
-	        assertEquals(today.plusDays(14), loan.getDueDate());
-	    }
+        library.lend("M001", "C001", today);
 
-	    @Test
-	    public void testCannotLendUnavailableCopy() {
+        assertThrows(IllegalStateException.class, () -> {
+            library.lend("M001", "C001", today);
+        });
+    }
 
-	        library.lend("M001", "C001", today);
+    @Test
+    public void testMaximumFiveLoans() {
 
-	        assertThrows(IllegalStateException.class, () -> {
-	            library.lend("M001", "C001", today);
-	        });
-	    }
+        library.lend("M001", "C001", today);
+        library.lend("M001", "C002", today);
+        library.lend("M001", "C003", today);
+        library.lend("M001", "C004", today);
+        library.lend("M001", "C005", today);
 
-	    @Test
-	    public void testMaximumFiveLoans() {
+        assertThrows(IllegalStateException.class, () -> {
+            library.lend("M001", "C006", today);
+        });
+    }
 
-	        library.lend("M001", "C001", today);
-	        library.lend("M001", "C002", today);
-	        library.lend("M001", "C003", today);
-	        library.lend("M001", "C004", today);
-	        library.lend("M001", "C005", today);
+    @Test
+    public void testUnknownMember() {
 
-	        assertThrows(IllegalStateException.class, () -> {
-	            library.lend("M001", "C006", today);
-	        });
-	    }
+        assertThrows(IllegalArgumentException.class, () -> {
+            library.lend("M999", "C001", today);
+        });
+    }
 
-	    @Test
-	    public void testUnknownMember() {
+    @Test
+    public void testUnknownCopy() {
 
-	        assertThrows(IllegalArgumentException.class, () -> {
-	            library.lend("M999", "C001", today);
-	        });
-	    }
+        assertThrows(IllegalArgumentException.class, () -> {
+            library.lend("M001", "C999", today);
+        });
+    }
 
-	    @Test
-	    public void testUnknownCopy() {
+    @Test
+    public void testReturnCopy() {
 
-	        assertThrows(IllegalArgumentException.class, () -> {
-	            library.lend("M001", "C999", today);
-	        });
-	    }
+        Loan loan = library.lend("M001", "C001", today);
 
-	    @Test
-	    public void testReturnCopy() {
+        library.returnCopy("C001", today.plusDays(5));
 
-	        Loan loan = library.lend("M001", "C001", today);
+        assertTrue(copy1.isAvailable());
+        assertFalse(loan.isOpen());
+        assertEquals(today.plusDays(5), loan.getReturnDate());
+    }
 
-	        library.returnCopy("C001", today.plusDays(5));
+    @Test
+    public void testReturnCopyWithoutLoan() {
 
-	        assertTrue(copy1.isAvailable());
-	        assertFalse(loan.isOpen());
-	        assertEquals(today.plusDays(5), loan.getReturnDate());
-	    }
+        assertThrows(IllegalStateException.class, () -> {
+            library.returnCopy("C001", today);
+        });
+    }
 
-	    @Test
-	    public void testReturnCopyWithoutLoan() {
+    @Test
+    public void testLoanIsLate() {
 
-	        assertThrows(IllegalStateException.class, () -> {
-	            library.returnCopy("C001", today);
-	        });
-	    }
+        Loan loan = new Loan(member, copy1, today);
 
-	    @Test
-	    public void testLoanIsLate() {
+        assertTrue(loan.isLate(today.plusDays(15)));
+        assertFalse(loan.isLate(today.plusDays(10)));
+    }
 
-	        Loan loan = new Loan(member, copy1, today);
+    // Search tests
 
-	        assertTrue(loan.isLate(today.plusDays(15)));
-	        assertFalse(loan.isLate(today.plusDays(10)));
-	    }
-	}
+    @Test
+    public void testSearchByTitle() {
+
+        List<Book> results = library.searchByTitle("Java");
+
+        assertEquals(1, results.size());
+        assertEquals("Java Programming", results.get(0).getTitle());
+    }
+
+    @Test
+    public void testSearchByTitleIgnoreCase() {
+
+        List<Book> results = library.searchByTitle("java");
+
+        assertEquals(1, results.size());
+    }
+
+    @Test
+    public void testSearchByTitleNoResults() {
+
+        List<Book> results = library.searchByTitle("Python");
+
+        assertTrue(results.isEmpty());
+    }
+}
 
