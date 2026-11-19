@@ -1,0 +1,59 @@
+@startuml
+' جعل الاتجاه من اليسار إلى اليمين لتنظيم الرسمة بشكل أفضل
+left to right direction
+
+' --- 1. تعريف المستخدمين (Actors) ---
+actor User
+actor Member
+actor Librarian
+actor "Mail server" as Mail <<actor>>
+
+' --- 2. علاقات الوراثة (Generalization) ---
+' العضو والمكتبي هما نوعان من المستخدم (User)
+User <|-- Member
+User <|-- Librarian
+
+' --- 3. حدود النظام (System Boundary) ---
+rectangle "Library system" {
+    ' تعريف حالات الاستخدام (Use Cases)
+    usecase "Search the catalog" as Search
+    usecase "Reserve a book" as Reserve
+    usecase "Renew a loan" as Renew
+    usecase "Register a loan" as Lend
+    
+    ' حالة استخدام تحتوي على نقطة تمديد (Extension Point) على عدة أسطر
+    usecase Return as "Register a return
+    extension points
+    late return"
+    
+    usecase "Manage the catalog" as Manage
+    usecase "Check borrowing rights" as Check
+    usecase "Suspend the member" as Suspend
+
+    ' --- 4. ربط الأكتورز بحالات الاستخدام ---
+    User --> Search
+    Member --> Reserve
+    Member --> Renew
+    Librarian --> Lend
+    Librarian --> Return
+    Librarian --> Manage
+
+    ' --- 5. علاقات التضمين والتمديد (Include & Extend) ---
+    ' التحقق من حقوق الاستعارة مطلوب دائماً عند تجديد أو تسجيل إعارة
+    Renew ..> Check : <<include>>
+    Lend ..> Check : <<include>>
+    
+    ' تعليق العضوية يتم كإمتداد لحالة إرجاع الكتاب في حال التأخير
+    Suspend ..> Return : <<extend>>
+}
+
+' --- 6. ربط خارجي مع سيرفر البريد ---
+Reserve --> Mail
+
+' --- 7. إضافة الملاحظة (Note) الخاصة بشرط التأخير ---
+note right of Suspend
+  condition: {returned late}
+  extension point: late return
+end note
+
+@enduml

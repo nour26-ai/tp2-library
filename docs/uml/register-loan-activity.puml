@@ -1,0 +1,44 @@
+
+@startuml
+
+|Librarian|
+start
+:Select the member;
+
+|System|
+:Check borrowing rights;
+
+if (Rights accepted?) then (yes)
+
+  repeat
+
+    |Librarian|
+    :Scan the copy;
+
+    |System|
+    :Check copy availability;
+
+    if (Copy available?) then (yes)
+      :Check reservation;
+
+      if (Reserved for another member?) then (yes)
+        :Reject the loan;
+      else (no)
+        :Register the loan;
+      endif
+
+    else (no)
+      :Reject the loan;
+    endif
+
+  repeat while (Another copy?) is (yes) not (no)
+
+else (no)
+  :Refuse borrowing rights;
+endif
+
+|Librarian|
+:Finish the operation;
+
+stop
+@enduml
