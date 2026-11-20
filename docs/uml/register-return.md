@@ -21,6 +21,7 @@ Mail server
 ## Preconditions
 - The member has borrowed a copy.
 - The copy is registered in the library system.
+- The librarian is authenticated.
 
 ## Postconditions
 - The loan is closed.
@@ -37,9 +38,20 @@ Mail server
 6. The system checks whether the copy is reserved.
 7. The system keeps the copy aside if it is reserved.
 8. The system notifies the member who reserved the copy.
-9. The system confirms that the return has been registered.
+9. The system prints the return receipt.
+10. The system confirms that the return has been registered.
 
 ## Extensions
+
+- 1a. The barcode cannot be read:
+  1. The librarian manually enters the inventory number.
+  2. The system retrieves the copy information.
+
+- 2a. The copy is not on loan:
+  1. The system displays an error message.
+  2. The system cancels the return operation.
+  3. The use case ends.
+
 - 5a. The return is late:
   1. The system detects that the return is late.
   2. The extension point `late return` is activated.
@@ -55,3 +67,4 @@ Mail server
 
 ## Frequency of Occurrence
 This use case occurs whenever a member returns a borrowed copy.
+
