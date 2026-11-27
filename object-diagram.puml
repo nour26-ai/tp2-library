@@ -1,0 +1,77 @@
+
+@startuml
+
+' Authors
+object "a1 : Author" as a1 {
+    name = "First author"
+}
+
+object "a2 : Author" as a2 {
+    name = "Second author"
+}
+
+' Book
+object "b : Book" as b {
+    isbn = "978-0-00-000001-1"
+    title = "Software Engineering"
+    year = 2016
+}
+
+' Copies
+object "c1 : Copy" as c1 {
+    inventoryNumber = "C-001"
+    status = BORROWED
+}
+
+object "c2 : Copy" as c2 {
+    inventoryNumber = "C-002"
+    status = BORROWED
+}
+
+' Student
+object "s : StudentMember" as s {
+    memberId = "M-01"
+    name = "Student 1"
+    email = "s1@example.org"
+}
+
+' Teacher
+object "t : TeacherMember" as t {
+    memberId = "T-01"
+    name = "Teacher 1"
+    email = "teacher@example.org"
+}
+
+' Loans
+object "l1 : Loan" as l1 {
+    loanDate = "2026-10-01"
+    dueDate = "2026-10-15"
+}
+
+object "l2 : Loan" as l2 {
+    loanDate = "2026-10-01"
+    dueDate = "2026-10-15"
+}
+
+' Reservation
+object "r : Reservation" as r {
+    date = "2026-10-02"
+}
+
+' Associations
+a1 -- b : authors
+a2 -- b : authors
+
+b -- c1 : copies
+b -- c2 : copies
+
+s -- l1 : loans
+s -- l2 : loans
+
+l1 -- c1 : copy
+l2 -- c2 : copy
+
+t -- r : reservations
+r -- b : book
+
+@enduml

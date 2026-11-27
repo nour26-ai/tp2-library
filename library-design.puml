@@ -1,0 +1,80 @@
+
+@startuml
+
+abstract class Member {
+    - memberNumber : String
+    - name : String
+    - email : String
+    - loans : List<Loan>
+    - reservations : List<Reservation>
+    + maxLoans() : int
+    + canBorrow() : boolean
+    + borrow(copy : Copy, today : LocalDate) : Loan
+    + reserve(book : Book, date : LocalDate) : Reservation
+}
+
+class StudentMember {
+    - level : String
+    + maxLoans() : int
+}
+
+class TeacherMember {
+    - department : String
+    + maxLoans() : int
+}
+
+class Loan {
+    - loanDate : LocalDate
+    - dueDate : LocalDate
+    - returnDate : LocalDate
+    + close(today : LocalDate) : void
+    + isLate(today : LocalDate) : boolean
+}
+
+class Copy {
+    - inventoryNumber : String
+    - status : CopyStatus
+    + isAvailable() : boolean
+    + getCurrentLoan() : Loan
+    + markLost() : void
+}
+
+class Book {
+    - isbn : String
+    - title : String
+    - year : int
+    + addAuthor(author : Author) : void
+    + firstReservation() : Reservation
+}
+
+class Author {
+    - name : String
+    + addBook(book : Book) : void
+}
+
+class Reservation {
+    - date : LocalDate
+}
+
+enum CopyStatus {
+    AVAILABLE
+    BORROWED
+    LOST
+}
+
+' Inheritance
+Member <|-- StudentMember
+Member <|-- TeacherMember
+
+' Associations and navigability
+Member "1" --> "0..*" Loan : loans
+Loan "0..*" <--> "1" Copy : loans / copy
+Book "1" --> "0..*" Copy : copies
+Book "1..*" <--> "1..*" Author : books / authors
+Member "1" --> "0..*" Reservation : reservations
+Book "1" --> "0..*" Reservation : reservations
+
+skinparam classAttributeIconSize 0
+hide circle
+
+@enduml
